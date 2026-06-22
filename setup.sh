@@ -58,9 +58,10 @@ brew install --cask btop
 brew install nowplaying-cli
 brew install background-music
 brew install htop
+brew install pyenv rbenv direnv
 
 # Terminal
-brew install neovim
+brew install neovim ripgrep
 
 
 curl -L https://github.com/kvndrsslr/sketchybar-app-font/releases/download/v2.0.25/sketchybar-app-font.ttf -o $HOME/Library/Fonts/sketchybar-app-font.ttf
