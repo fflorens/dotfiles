@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+DOTFILES="$(cd "$(dirname "$0")" && pwd)"
+PERSONAL_DOTFILES="$HOME/.dotfiles"
+PERSONAL_DOTFILES_REPO="https://github.com/fflorens/dotfiles.git"
+
+# Personal dotfiles — must be set up first; work stow layers on top
+if [ ! -d "$PERSONAL_DOTFILES" ]; then
+    echo "Cloning personal dotfiles..."
+    git clone "$PERSONAL_DOTFILES_REPO" "$PERSONAL_DOTFILES"
+fi
+echo "Setting up personal dotfiles..."
+bash "$PERSONAL_DOTFILES/setup.sh"
+
+# Work-specific apps
+echo "Installing work-specific apps..."
+brew install --cask meetingbar
+
+# Register this repo so dotfiles-update picks it up on future runs
+EXTRA_REPOS="$HOME/.config/dotfiles/extra-repos"
+mkdir -p "$(dirname "$EXTRA_REPOS")"
+if ! grep -qxF "$DOTFILES" "$EXTRA_REPOS" 2>/dev/null; then
+    echo "$DOTFILES" >> "$EXTRA_REPOS"
+    echo "Registered $DOTFILES in $EXTRA_REPOS"
+fi
+
+# Stow work dotfiles on top
+echo "Stowing work dotfiles..."
+"$DOTFILES/stow.sh"

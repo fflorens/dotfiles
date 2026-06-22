@@ -35,6 +35,8 @@ cc -target arm64-apple-macos11 \
   "$(dirname "$0")/sleepwatcher/brightness.c" -o "$HOME/.local/bin/brightness"
 chmod 0755 "$HOME/.local/bin/brightness"
 
+brew tap nikitabobko/tap
+brew trust --formula nikitabobko/tap/aerospace
 brew install --cask nikitabobko/tap/aerospace
 
 brew tap FelixKratz/formulae
