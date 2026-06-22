@@ -1,0 +1,179 @@
+local colors        = require("colors")
+local icons         = require("icons")
+local settings      = require("settings")
+local popup_manager = require("helpers.popup_manager")
+
+local popup_width = 250
+
+local volume_percent = sbar.add("item", "widgets.volume1", {
+    position = "right",
+    icon = {
+        drawing = false
+    },
+    label = {
+        string = "??%",
+        padding_left = -1,
+        font = {
+            family = settings.font.numbers
+        }
+    }
+})
+
+local volume_icon = sbar.add("item", "widgets.volume2", {
+    position = "right",
+    padding_right = -1,
+    icon = {
+        string = icons.volume._100,
+        width = 0,
+        align = "left",
+        color = colors.grey,
+        font = {
+            style = settings.font.style_map["Regular"],
+            size = 14.0
+        }
+    },
+    label = {
+        width = 25,
+        align = "left",
+        font = {
+            style = settings.font.style_map["Regular"],
+            size = 14.0
+        }
+    }
+})
+
+local volume_bracket = sbar.add("bracket", "widgets.volume.bracket", {volume_icon.name, volume_percent.name}, {
+    background = {
+        color = colors.bg1,
+        border_color = colors.rainbow[#colors.rainbow - 3],
+        border_width = 1
+    },
+    popup = {
+        align = "center"
+    }
+})
+
+sbar.add("item", "widgets.volume.padding", {
+    position = "right",
+    width = settings.group_paddings
+})
+
+local volume_slider = sbar.add("slider", popup_width, {
+    position = "popup." .. volume_bracket.name,
+    slider = {
+        highlight_color = colors.blue,
+        background = {
+            height = 6,
+            corner_radius = 3,
+            color = colors.bg2
+        },
+        knob = {
+            string = "􀀁",
+            drawing = true
+        }
+    },
+    background = {
+        color = colors.bg1,
+        height = 2,
+        y_offset = -20
+    },
+    click_script = 'osascript -e "set volume output volume $PERCENTAGE"'
+})
+
+volume_percent:subscribe("volume_change", function(env)
+    local volume = tonumber(env.INFO)
+    local icon = icons.volume._0
+    if volume > 60 then
+        icon = icons.volume._100
+    elseif volume > 30 then
+        icon = icons.volume._66
+    elseif volume > 10 then
+        icon = icons.volume._33
+    elseif volume > 0 then
+        icon = icons.volume._10
+    end
+
+    local lead = ""
+    if volume < 10 then
+        lead = "0"
+    end
+
+    volume_icon:set({
+        label = icon
+    })
+    volume_percent:set({
+        label = lead .. volume .. "%"
+    })
+    volume_slider:set({
+        slider = {
+            percentage = volume
+        }
+    })
+end)
+
+local function volume_collapse_details()
+    if volume_bracket:query().popup.drawing ~= "on" then return end
+    volume_bracket:set({ popup = { drawing = false } })
+    sbar.remove('/volume.device\\.*/')
+end
+
+popup_manager.register(volume_collapse_details)
+
+-- Routes through Background Music's AppleScript API so the system output
+-- always stays on the "Background Music" virtual sink.
+local BGM_GET_CURRENT = "osascript -e 'tell application \"Background Music\" to get name of selected output device'"
+local BGM_GET_ALL     = "osascript -e 'tell application \"Background Music\" to get name of every output device'"
+local function bgm_switch_script(device)
+    return "osascript -e 'tell application \"Background Music\" to set selected output device to output device named \"" ..
+        device .. "\"'" ..
+        " && sketchybar --set /volume.device\\.*/ label.color=" .. colors.grey ..
+        " --set $NAME label.color=" .. colors.white
+end
+
+local current_audio_device = "None"
+local function volume_toggle_details(env)
+    if env.BUTTON == "right" then
+        sbar.exec("open /System/Library/PreferencePanes/Sound.prefpane")
+        return
+    end
+
+    local should_draw = volume_bracket:query().popup.drawing == "off"
+    popup_manager.close_all()
+    if should_draw then
+        volume_bracket:set({ popup = { drawing = true } })
+        sbar.exec(BGM_GET_CURRENT, function(result)
+            current_audio_device = result:gsub("%s+$", "")
+            sbar.exec(BGM_GET_ALL, function(available)
+                local counter = 0
+                for raw in available:gmatch("[^,\r\n]+") do
+                    local device = raw:match("^%s*(.-)%s*$")
+                    if device ~= "" then
+                        local color = (device == current_audio_device) and colors.white or colors.grey
+                        sbar.add("item", "volume.device." .. counter, {
+                            position = "popup." .. volume_bracket.name,
+                            width = popup_width,
+                            align = "center",
+                            label = { string = device, color = color },
+                            click_script = bgm_switch_script(device)
+                        })
+                        counter = counter + 1
+                    end
+                end
+            end)
+        end)
+    else
+        volume_collapse_details()
+    end
+end
+
+local function volume_scroll(env)
+    local delta = env.SCROLL_DELTA
+    sbar.exec('osascript -e "set volume output volume (output volume of (get volume settings) + ' .. delta .. ')"')
+end
+
+volume_icon:subscribe("mouse.clicked", volume_toggle_details)
+volume_icon:subscribe("mouse.scrolled", volume_scroll)
+volume_percent:subscribe("mouse.clicked", volume_toggle_details)
+volume_percent:subscribe("mouse.exited.global", volume_collapse_details)
+volume_percent:subscribe("mouse.scrolled", volume_scroll)
+

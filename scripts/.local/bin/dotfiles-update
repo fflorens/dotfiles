@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+PERSONAL="$HOME/.dotfiles"
+EXTRA_REPOS="$HOME/.config/dotfiles/extra-repos"
+
+if [ -d "$PERSONAL" ]; then
+    echo "── Personal dotfiles ──────────────────"
+    bash "$PERSONAL/update.sh"
+else
+    echo "Personal dotfiles not found at $PERSONAL, skipping."
+fi
+
+if [ -f "$EXTRA_REPOS" ]; then
+    while IFS= read -r repo || [ -n "$repo" ]; do
+        [[ "$repo" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${repo//[[:space:]]/}" ]] && continue
+        repo="${repo/#\~/$HOME}"
+        if [ -d "$repo" ]; then
+            echo "── Extra dotfiles: $(basename "$repo") ─"
+            bash "$repo/stow.sh"
+        else
+            echo "  (skipping missing repo: $repo)"
+        fi
+    done < "$EXTRA_REPOS"
+fi

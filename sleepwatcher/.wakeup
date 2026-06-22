@@ -1,0 +1,7 @@
+#!/bin/bash
+hour=$(date +%H)
+if [ "$hour" -ge 23 ] || [ "$hour" -lt 9 ]; then
+  ${HOME}/.local/bin/brightness 0.2
+else
+  ${HOME}/.local/bin/brightness 0.7
+fi

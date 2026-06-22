@@ -1,0 +1,28 @@
+[user]
+	name  = Florian Florensa
+	email = 6020879+fflorens@users.noreply.github.com
+
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+
+[core]
+	excludesFile = ~/.gitignore
+
+[include]
+	path = ~/.gitconfig.work
+
+[include]
+	path = ~/.gitconfig.local
+
+[alias]
+	wip   = for-each-ref --sort='authordate:iso8601' --format=' %(color:green)%(authordate:relative)%09%(color:white)%(refname:short)' refs/heads
+	grame = "!r() { git grep -n $1 $2 | while IFS=: read i j k; do echo $i; git blame -f -L $j,$j $i; done }; r"
+
+[diff]
+	tool = vimdiff
+
+[worktree]
+	useRelativePaths = true
+
+[init]
+	defaultBranch = main

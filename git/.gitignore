@@ -1,0 +1,4 @@
+bazel-*
+branch-yaml
+
+**/.claude/settings.local.json

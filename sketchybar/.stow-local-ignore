@@ -1,0 +1,2 @@
+# Compiled helper binaries are built by make, not managed by stow
+\.config/sketchybar/helpers/.*/bin

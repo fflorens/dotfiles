@@ -1,0 +1,56 @@
+return {
+    plus = "􀅼",
+    loading = "􀖇",
+    apple = "",
+    rebel = "",
+    empire = "",
+    gear = "􀍟",
+    cpu = "􀫥",
+    nuke = "",
+    clipboard = "􀉄",
+
+    switch = {
+        on = "􁏮",
+        off = "􁏯"
+    },
+    volume = {
+        _100 = "􀊩",
+        _66 = "􀊧",
+        _33 = "􀊥",
+        _10 = "􀊡",
+        _0 = "􀊣"
+    },
+    battery = {
+        _100 = "􀛨",
+        _75 = "􀺸",
+        _50 = "􀺶",
+        _25 = "􀛩",
+        _0 = "􀛪",
+        charging = "􀢋"
+    },
+    wifi = {
+        upload = "􀄨",
+        download = "􀄩",
+        connected = "􀙇",
+        disconnected = "􀙈",
+        router = "􁓤"
+    },
+    media = {
+        back = "􀊊",
+        forward = "􀊌",
+        play_pause = "􀊈"
+    },
+    bluetooth = {
+        on = "\u{F293}",
+        off = "\u{F293}",
+        connected = "\u{F294}"
+    },
+    vpn = {
+        connected    = "\u{F132}",
+        disconnected = "\u{F132}"
+    },
+    privileges = {
+        admin    = "\u{F023}",
+        standard = "\u{F09C}"
+    }
+}
